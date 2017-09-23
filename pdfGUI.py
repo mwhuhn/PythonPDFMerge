@@ -62,7 +62,7 @@ class SelectFilesPage(tk.Frame):
         spacer1 = tk.Label(self, text="")
         spacer1.grid(row=0, column=0, columnspan=3, sticky="we")        
 
-        label = tk.Label(self, text="Welcome to MergeMyPDF. Select your files to merge.")
+        label = tk.Label(self, text="Select your files to merge.")
         label.grid(row=1, column=0, columnspan=3, sticky="w")
 
         spacer2 = tk.Label(self, text="")
