@@ -73,7 +73,10 @@ class SelectFilesPage(tk.Frame):
         
         scrollbarV = tk.Scrollbar(self)
         scrollbarH = tk.Scrollbar(self, orient="horizontal")
-        listbox = tk.Listbox(self, width = 70, yscrollcommand=scrollbarV.set, xscrollcommand=scrollbarH.set)
+        listbox = tk.Listbox(self, width = 70,
+                             yscrollcommand=scrollbarV.set,
+                             xscrollcommand=scrollbarH.set,
+                             selectmode=tk.EXTENDED)
         scrollbarV.config(command=listbox.yview)
         scrollbarH.config(command=listbox.xview)
 
@@ -151,12 +154,26 @@ class SelectFilesPage(tk.Frame):
         selected = listbox.curselection()
         if not selected:
             return # cancels if no file selected
-        selected = selected[0]
-        if selected == 0:
-            return # prevents move up if already at start
-        text = listbox.get(selected)
-        listbox.delete(selected)
-        listbox.insert(selected-1, text)
+        nomovelast = False
+        for i in selected:
+            if i == 0: # don't move up if i is 0
+                last = 0
+                nomovelast = True
+                continue
+            elif nomovelast: # don't move up if last didn't move up
+                if i - 1 == last: # but only if they're 1 away from eachother
+                    last = i
+                    continue
+                else:
+                    text = listbox.get(i)
+                    listbox.delete(i)
+                    listbox.insert(i-1, text)
+                    listbox.selection_set(i-1)                    
+            else: # move selected up one and keep it selected
+                text = listbox.get(i)
+                listbox.delete(i)
+                listbox.insert(i-1, text)
+                listbox.selection_set(i-1)
 
         
     # Moves selected file down one position
@@ -164,19 +181,37 @@ class SelectFilesPage(tk.Frame):
         selected = listbox.curselection()
         if not selected:
             return # cancels if no file selected
-        selected = selected[0]
-        if selected == tk.END:
-            return # prevents movedown if already at end
-        text = listbox.get(selected)
-        listbox.delete(selected)
-        listbox.insert(selected+1, text)
+        nomovelast = False
+        selected = selected[::-1]
+        for i in selected:
+            if i == listbox.size() - 1: # don't move down if i is last
+                last = i
+                nomovelast = True
+                continue
+            elif nomovelast: # don't move up if last didn't move up
+                if i + 1 == last: # but only if they're 1 away from eachother
+                    last = i
+                    continue
+                else:
+                    text = listbox.get(i)
+                    listbox.delete(i)
+                    listbox.insert(i+1, text)
+                    listbox.selection_set(i+1)                    
+            else: # move selected up one and keep it selected
+                text = listbox.get(i)
+                listbox.delete(i)
+                listbox.insert(i+1, text)
+                listbox.selection_set(i+1)
+
     
     # Removes selected file
     def removeSelected(self, listbox):
         selected = listbox.curselection()
         if not selected:
             return # cancels remove if none selected
-        listbox.delete(selected)
+        selected = selected[::-1]
+        for i in selected:
+            listbox.delete(i)
         
      # Merges all pdf files in list
     def mergePDF(self, listbox):
