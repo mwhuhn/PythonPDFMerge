@@ -1,26 +1,26 @@
 # -*- coding: utf-8 -*-
-#!/usr/bin/env python 1
+#!/usr/bin/env python3
 
-"""
-This is a GUI pdf merger program. You can select individual files or
-whole folders to add to a  merger list. You can move files up or down
-in the merger order and remove files.
-"""
 
-import Tkinter as tk
-import tkFileDialog
+# """
+# This is a GUI pdf merger program. You can select individual files or
+# whole folders to add to a  merger list. You can move files up or down
+# in the merger order and remove files.
+# """
+
+import tkinter as tk
+from tkinter import filedialog, messagebox
 import os
 from PyPDF2 import PdfFileReader, PdfFileMerger
-from tkMessageBox import showinfo
 #import re # add if using numerical order for folder
 
 
 class MainView(tk.Tk):
-    """ 
-        Main view of GUI
-        Included to make adding new frames easy
-        To add frame, add frame name to initialization command and add class(tk.Frame)
-    """
+    # """ 
+    #     Main view of GUI
+    #     Included to make adding new frames easy
+    #     To add frame, add frame name to initialization command and add class(tk.Frame)
+    # """
     def __init__(self, *args, **kwargs):
         
         tk.Tk.__init__(self, *args, **kwargs)
@@ -30,10 +30,10 @@ class MainView(tk.Tk):
 
         self.frames = {}
         
-        """ Initialize subpages
-        Creates a dictionary connecting string page names (key) to the
-        frames (value)
-        """
+        # """ Initialize subpages
+        # Creates a dictionary connecting string page names (key) to the
+        # frames (value)
+        # """
         for F in [SelectFilesPage]:
             page = F.__name__
             frame = F(parent=container, controller=self)
@@ -43,17 +43,17 @@ class MainView(tk.Tk):
         # Show first page
         self.showFrame("SelectFilesPage")
 
-    """ Raise frame function
-    Uses frames dictionary to call a frame from the page name (key)    
-    """
+    # """ Raise frame function
+    # Uses frames dictionary to call a frame from the page name (key)    
+    # """
     def showFrame(self, page):
         frame = self.frames[page]
         frame.tkraise()
 
 class SelectFilesPage(tk.Frame):
-    """ Page allows you to select the pdf files to merge in order
+    # """ Page allows you to select the pdf files to merge in order
     
-    """
+    # """
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
         self.controller = controller
@@ -120,7 +120,7 @@ class SelectFilesPage(tk.Frame):
     
     # Add filename/directory to listbox    
     def addFile(self, listbox):
-        name = tkFileDialog.askopenfilename(filetypes=[('PDF files', '.pdf')],
+        name = filedialog.askopenfilename(filetypes=[('PDF files', '.pdf')],
                                             initialdir = self.lastdir)
         if not name:
             return # cancels if no file selected
@@ -129,7 +129,7 @@ class SelectFilesPage(tk.Frame):
     
     # Add all files in folder to listbox, in str.lower order
     def addFolder(self, listbox):
-        directory = tkFileDialog.askdirectory(initialdir = self.lastdir)
+        directory = filedialog.askdirectory(initialdir = self.lastdir)
         self.lastdir = directory # update last directory used
         pdf_files = [f for f in os.listdir(directory) if f.endswith("pdf")]
         if len(pdf_files) == 0:
@@ -216,17 +216,17 @@ class SelectFilesPage(tk.Frame):
      # Merges all pdf files in list
     def mergePDF(self, listbox):
         # ensure only pdf files included
-        name = tkFileDialog.asksaveasfilename(defaultextension=".pdf",
-                                              filetypes=[('PDF files', '.pdf')],
-                                              initialdir = self.lastdir)
+        name = filedialog.asksaveasfilename(defaultextension=".pdf",
+                                            filetypes=[('PDF files', '.pdf')],
+                                            initialdir = self.lastdir)
         if not name:
             return # cancels merge if no save name
         sortedFiles = listbox.get(0,tk.END)
         merger = PdfFileMerger()
         for filename in sortedFiles:
-            merger.append(PdfFileReader(filename), "rb")
+            merger.append(PdfFileReader(filename, strict=False), "rb")
         merger.write(name)
-        showinfo("Finished", "Files merged.")
+        messagebox.showinfo("Finished", "Files merged.")
 
 if __name__ == "__main__":
     root = MainView()
